@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW4_互動鋼琴</title>
+    <style>
+        .key {
+            width: 68px;
+            height: 200px;
+            margin: 1px;
+            display: inline-block;
+            background: white;
+            border: 1px solid black;
+            position: relative;
+        }
+        .key.black {
+            width: 45px;
+            height: 140px;
+            background: black;
+            z-index: 2;
+            margin-left: -20px;
+            margin-right: -20px;
+        }
+        .key:active {
+            background: #05777A;
+        }
+    </style>
+</head>
+<body>
+    <div id="piano"></div>
+    <script>
+        const keys = [
+            { note: "C4", black: false },
+            { note: "C#4", black: true },
+            { note: "D4", black: false },
+            { note: "D#4", black: true },
+            { note: "E4", black: false },
+            { note: "F4", black: false },
+            { note: "F#4", black: true },
+            { note: "G4", black: false },
+            { note: "G#4", black: true },
+            { note: "A4", black: false },
+            { note: "A#4", black: true },
+            { note: "B4", black: false },
+            { note: "C5", black: false }
+        ];
+        const notes = {
+            "C4": 261.63, "C#4": 277.18, "D4": 293.66, "D#4": 311.13,
+            "E4": 329.63, "F4": 349.23, "F#4": 369.99, "G4": 392.00,
+            "G#4": 415.30, "A4": 440.00, "A#4": 466.16, "B4": 493.88, "C5": 523.25
+        };
+        const piano = document.getElementById('piano');
+        keys.forEach(k => {
+            const div = document.createElement('div');
+            div.className = 'key' + (k.black ? ' black' : '');
+            div.dataset.note = k.note;
+            piano.appendChild(div);
+        });
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        piano.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('mousedown', playNote);
+            key.addEventListener('mouseup', stopNote);
+        });
+        function playNote(event) {
+            const note = event.target.dataset.note;
+            const frequency = notes[note];
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            event.target.oscillator = oscillator;
+        }
+        function stopNote(event) {
+            const oscillator = event.target.oscillator;
+            if (oscillator) oscillator.stop();
+        }
+    </script>
+</body>
+</html>
